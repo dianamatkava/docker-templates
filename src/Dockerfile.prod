@@ -20,7 +20,7 @@ RUN apk update \
 RUN pip install --upgrade pip
 RUN pip install flake8==3.9.2
 COPY . .
-RUN flake8 --ignore=E501,F401 ./app
+# RUN flake8 --ignore=E501,F401 ./core
 
 # install dependencies
 COPY ./requirements.txt .
@@ -58,6 +58,7 @@ ENV APP_HOME=/home/app/web
 RUN mkdir $APP_HOME
 
 RUN mkdir $APP_HOME/staticfiles
+RUN mkdir $APP_HOME/mediafiles
 # Docker Compose normally mounts named volumes as root. And since 
 # we're using a non-root user, we'll get a permission denied error 
 # when the collectstatic command is run if the directory does 
