@@ -8,6 +8,8 @@ services:
       context: ./
       dockerfile: Dockerfile.prod
     command: gunicorn core.wsgi:application --bind 0.0.0.0:8000
+    volumes: 
+      - static_volume:/home/app/web/staticfiles
     expose:
       - 8000
     # Now, port 8000 is only exposed internally, to other Docker services. 
@@ -25,6 +27,8 @@ services:
 
   nginx:
     build: ./nginx
+    volumes: 
+      - static_volume:/home/app/web/staticfiles
     ports:
       - 1337:80
     depends_on:
@@ -32,3 +36,7 @@ services:
 
 volumes:
   postgres_data:
+  static_volume:
+
+# add a volume to the web and nginx services in docker-compose.prod.yml 
+# so that each container will share a directory named "staticfiles"
