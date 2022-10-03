@@ -1,5 +1,7 @@
 version: '3.8'
 
+# http://localhost:1337
+
 services:
   web:
     build:
