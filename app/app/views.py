@@ -1,8 +1,10 @@
 from django.shortcuts import render
 from django.core.files.storage import FileSystemStorage
+from core.tasks import sample_task
 
 
 def image_upload(request):
+    sample_task.apply_async()
     if request.method == "POST" and request.FILES["image_file"]:
         image_file = request.FILES["image_file"]
         fs = FileSystemStorage()

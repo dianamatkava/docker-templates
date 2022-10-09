@@ -2,10 +2,10 @@ version: '3.8'
 
 services: 
   web: 
-    build: ./src
+    build: ./app
     command: python manage.py runserver 0.0.0.0:8000
     volumes: 
-      - .:/usr/src/app/
+      - ./app:/usr/src/app/
     ports:
       - 8000:8000
     env_file:
@@ -18,9 +18,34 @@ services:
     volumes:
       - postgres_data:/var/lib/postgres/data/
     environment:
-      - POSTGRES_USER=docker_django
+      - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=docker_django
+      - POSTGRES_DB=postgres
+      
+  redis:
+    image: redis:alpine
+  
+  celery:
+    build: ./app
+    command: celery -A core worker -l info
+    volumes:
+      - ./app:/urs/src/app/
+    env_file:
+      - ./.env.dev
+    depends_on:
+      - redis 
+      - web
+    
+  celery-beat:
+    build: ./app
+    command: celery -A core worker -l info
+    volumes:
+      - ./app:/urs/src/app/
+    env_file:
+      - ./.env.dev
+    depends_on:
+      - redis 
+      - web
 
 
 volumes: 
