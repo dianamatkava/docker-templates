@@ -60,5 +60,6 @@ RUN chmod +x /usr/src/app/entrypoint.sh
 # copy project
 COPY . .
 
-# run entrypoint.sh
+# run entrypoint.sh.
+# comment below line if you are working from windows
 ENTRYPOINT ["/usr/src/app/entrypoint.sh"]
