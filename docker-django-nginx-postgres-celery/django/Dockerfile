@@ -1,10 +1,10 @@
 # # pull official base image
 # FROM python:3.10.6-alpine
 
-# RUN mkdir -p /usr/src/app
+# RUN mkdir -p /usr/src/django
 
 # # set work directory1
-# WORKDIR /usr/src/app
+# WORKDIR /usr/src/django
 
 # # set environment variables
 # # Prevents Python from writing pyc files to disc (equivalent to python -B)
@@ -23,14 +23,14 @@
 
 # # copy entrypoint.sh
 # COPY ./entrypoint.sh .
-# RUN sed -i 's/\r$//g' /usr/src/app/entrypoint.sh
-# RUN chmod +x /usr/src/app/entrypoint.sh
+# RUN sed -i 's/\r$//g' /usr/src/django/entrypoint.sh
+# RUN chmod +x /usr/src/django/entrypoint.sh
 
 # # copy project
 # COPY . .
 
 # # run entrypoint.sh
-# ENTRYPOINT ["/usr/src/app/entrypoint.sh"]
+# ENTRYPOINT ["/usr/src/django/entrypoint.sh"]
 
 
 # pull official base image
@@ -49,13 +49,13 @@ RUN apk update \
 
 # install dependencies
 RUN pip install --upgrade pip
-COPY ./requirements.txt .
+COPY ../requirements.txt .
 RUN pip install -r requirements.txt
 
 # copy entrypoint.sh
-COPY ./entrypoint.sh .
-RUN sed -i 's/\r$//g' /usr/src/app/entrypoint.sh
-RUN chmod +x /usr/src/app/entrypoint.sh
+COPY entrypoint.sh .
+RUN sed -i 's/\r$//g' /usr/src/django/entrypoint.sh
+RUN chmod +x /usr/src/django/entrypoint.sh
 
 # copy project
 COPY . .

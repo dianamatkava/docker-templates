@@ -1,33 +1,23 @@
-﻿# Dockerizing Django with Celery, Postgres, Gunicorn, and Nginx
 
-This project contains a template to create
-docker containers for dev anf prod environments
-Servises: 
-* web -- Django, Gunicorn
-* db -- Postgres
-* celery
-* celery-beat
-* nginx
 
-Set up:
-for Linux user:
 
+
+## Run Postgres container
 ```bash
-# Dev:
-sudo docker-compose -f docker-compose-dev.yml up --build
-
-# Prod:
-sudo docker-compose -f docker-compose-prod.yml up --build
+docker run --name postgres-container \
+  -e POSTGRES_PASSWORD=postgres -e POSTGRES_USER=postgres \
+  -p 5432:5432 \
+  postgres
 ```
 
-
-for Windows user:
-go to Dockerfile/Dockerfile.prod and comment last line, then run:
-
+## Run Redis container
 ```bash
-# Dev:
-docker-compose -f docker-compose-dev.yml up --build
-
-# Prod:
-docker-compose -f docker-compose-prod.yml up --build
+docker network create redis-network
+# redis://:password@hostname:port/db_number
+# with docker you create a new network and use it as a host
+# test via: ping docker-template-redis
+docker run -d -p 6379:6379 --name redis-container \
+    -e REDIS_PASSWORD=password \
+    --network redis-network
+    redis
 ```

@@ -2,14 +2,14 @@ version: '3.8'
 
 services: 
   web: 
-    build: ./app
+    build: django
     command: python manage.py runserver 0.0.0.0:8000
     volumes: 
-      - ./app:/usr/src/app/
+      - ./django:/usr/src/django/
     ports:
       - 8000:8000
     env_file:
-      - ./.env.dev
+      - .env.dev
     depends_on:
       - db
 
@@ -26,23 +26,23 @@ services:
     image: redis:alpine
   
   celery:
-    build: ./app
+    build: django
     command: celery -A core worker -l info
     volumes:
-      - ./app:/urs/src/app/
+      - ./django:/urs/src/django/
     env_file:
-      - ./.env.dev
+      - .env.dev
     depends_on:
       - redis 
       - web
     
   celery-beat:
-    build: ./app
+    build: django
     command: celery -A core worker -l info
     volumes:
-      - ./app:/urs/src/app/
+      - ./django:/urs/src/django/
     env_file:
-      - ./.env.dev
+      - .env.dev
     depends_on:
       - redis 
       - web
