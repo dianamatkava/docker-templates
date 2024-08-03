@@ -1,2 +1,4 @@
-/venv
-app/mediafiles/*
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
