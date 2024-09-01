@@ -9,9 +9,7 @@ then
     done
 
     echo "PostgreSQL started"
+    python manage.py runserver
 fi
-
-# python manage.py flush --no-input
-# python manage.py migrate
 
 exec "$@"
