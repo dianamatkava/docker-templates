@@ -1,5 +1,6 @@
 # pull official base image
-FROM python:3.9.6-alpine
+FROM python:3.11-alpine
+# python version does not conflicts with poetry python env
 
 # set work directory
 WORKDIR /usr/src/app
@@ -10,19 +11,24 @@ ENV PYTHONUNBUFFERED 1
 
 # install psycopg2 dependencies
 RUN apk update \
-    && apk add postgresql-dev gcc python3-dev musl-dev
+    && apk add --no-cache postgresql-dev gcc python3-dev musl-dev
 
-# install dependencies
-COPY ../requirements.txt .
+# install poetry
 RUN pip install --upgrade pip \
-    && pip install -r requirements.txt
+    && pip install poetry
+
+# install dependencies for dev
+COPY ./django/pyproject.toml .
+RUN poetry install --no-root --with dev
 
 # copy entrypoint.sh
-COPY entrypoint.sh .
+COPY entrypoint.sh /usr/src/django/entrypoint.sh
 RUN sed -i 's/\r$//g' /usr/src/django/entrypoint.sh
 RUN chmod +x /usr/src/django/entrypoint.sh
 
-# copy project
-COPY . .
+ENTRYPOINT ["/usr/src/django/entrypoint.sh"]
 
-ENTRYPOINT ["/usr/src/app/entrypoint.sh"]
+# copy project
+COPY django .
+
+
