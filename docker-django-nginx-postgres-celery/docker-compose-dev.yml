@@ -2,10 +2,13 @@ version: '3.8'
 
 services: 
   web: 
-    build: django
-    command: python manage.py runserver 0.0.0.0:8000
+    build: django  # path to Dockerfile
+    entrypoint: ['/usr/src/django/entrypoint.sh'] # entrypoint containing steps before running django
+    command: ['poetry', 'run', 'python', 'manage.py', 'runserver', '0.0.0.0:8000']  # Run server after entrypoint
+#      - 'poetry run python manage.py migrate'
+#      - 'poetry run python manage.py runserver'  # not possible to run set of commands
     volumes: 
-      - ./django:/usr/src/django/
+      - ./django:/usr/src/django/  # bind mount specific path
     ports:
       - 8000:8000
     env_file:
@@ -13,22 +16,29 @@ services:
     depends_on:
       - db
 
-  db:
+  db:  # host name && network service name ==> db_host: db:
     image: postgres:13.0-alpine
     volumes:
-      - postgres_data:/var/lib/postgres/data/
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=postgres
+      - postgres_data:/var/lib/postgres/data/  # Named volume: persistent storage, useful for sharing data between containers
+    ports:
+      - 5432:5432
+    env_file:
+      - .env.dev
+#    environment:                    # we do not expose env this way normally
+#      - POSTGRES_USER=postgres
+#      - POSTGRES_PASSWORD=password
+#      - POSTGRES_DB=postgres
       
   redis:
     image: redis:alpine
+    volumes:
+      - redis_data:/data  # Named volume for persistent redis data
   
   celery:
-    build: django
-    command: celery -A core worker -l info
-    volumes:
+    build: django  # celery is part of django
+    entrypoint: [ '/usr/src/django/entrypoint.sh' ]
+    command: [ 'celery', '-A', 'core', 'worker', '-l', 'info' ]
+    volumes: # and the same src location
       - ./django:/urs/src/django/
     env_file:
       - .env.dev
@@ -38,7 +48,8 @@ services:
     
   celery-beat:
     build: django
-    command: celery -A core worker -l info
+    entrypoint: [ '/usr/src/django/entrypoint.sh' ]
+    command: [ 'celery', '-A', 'core', 'beat', '-l', 'info' ]
     volumes:
       - ./django:/urs/src/django/
     env_file:
@@ -47,9 +58,6 @@ services:
       - redis 
       - web
 
-
 volumes: 
   postgres_data:
-#To persist the data beyond the life of the container we configured a volume. 
-#This config will bind postgres_data to the "/var/lib/postgresql/data/" 
-#directory in the container.
+  redis_data:

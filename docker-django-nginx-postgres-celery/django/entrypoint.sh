@@ -1,16 +1,15 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 
 if [ "$DATABASE" = "postgres" ]
-
 then
-    echo "Whaiting for postgres ..."
-
+    echo "Waiting for PostgreSQL..."
     while ! nc -z $SQL_HOST $SQL_PORT; do
         sleep 0.1
     done
-
     echo "PostgreSQL started"
-
 fi
+
+# Run migrations
+poetry run python manage.py migrate
 
 exec "$@"

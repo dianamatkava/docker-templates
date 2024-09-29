@@ -1,6 +1,5 @@
 # pull official base image
 FROM python:3.11-alpine
-# python version does not conflicts with poetry python env
 
 # set work directory
 WORKDIR /usr/src/app
@@ -18,7 +17,7 @@ RUN pip install --upgrade pip \
     && pip install poetry
 
 # install dependencies for dev
-COPY ./django/pyproject.toml .
+COPY pyproject.toml .
 RUN poetry install --no-root --with dev
 
 # copy entrypoint.sh
@@ -26,9 +25,10 @@ COPY entrypoint.sh /usr/src/django/entrypoint.sh
 RUN sed -i 's/\r$//g' /usr/src/django/entrypoint.sh
 RUN chmod +x /usr/src/django/entrypoint.sh
 
+# copy project
+COPY . .
+
 ENTRYPOINT ["/usr/src/django/entrypoint.sh"]
 
-# copy project
-COPY django .
 
 
