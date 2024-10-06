@@ -3,16 +3,19 @@ version: '3.8'
 services: 
   web: 
     build: django  # path to Dockerfile
-    entrypoint: ['/usr/src/django/entrypoint.sh'] # entrypoint containing steps before running django
-    command: ['poetry', 'run', 'python', 'manage.py', 'runserver', '0.0.0.0:8000']  # Run server after entrypoint
+    entrypoint: ['/usr/src/django/entrypoint.sh'] # entrypoint containing steps (wait for Postgres connect and db migrations)
+    command: ['poetry', 'run', 'python', 'manage.py', 'runserver', '${DJANGO_HOST}']  # Run server after entrypoint done
 #      - 'poetry run python manage.py migrate'
 #      - 'poetry run python manage.py runserver'  # not possible to run set of commands
     volumes: 
       - ./django:/usr/src/django/  # bind mount specific path
     ports:
       - 8000:8000
-    env_file:
-      - .env.dev
+
+    # NOTE: --env-file overrides the .env file. You can have one or the other but not both.
+    env_file: # docker is smart enough to search .env.prod by default
+      - .env.dev   # but in case you have different name for the env file, needs to declare is explicitly
+
     depends_on:
       - db
 
@@ -33,7 +36,23 @@ services:
     image: redis:alpine
     volumes:
       - redis_data:/data  # Named volume for persistent redis data
-  
+
+    env_file:  # docker is smart enough to search .env.prod by default
+      - .env.dev   # but in case you have different name for the env file, needs to declare is explicitly
+
+    command: # ["redis-server", "--requirepass", "${REDIS_PASSWORD}"]  # (optional) enforce connection with password
+      - "redis-server"
+      - "--requirepass"
+      - "${REDIS_PASSWORD}"
+      # Note: If you use a non-standard env file, the value will not be available for interpolation.
+      # or export the variables to the host environment before running Docker Compose.
+      # or run the docker with --env-file .env.dev included.
+
+#    environment:
+# #     - REDIS_PORT host already defined as redis (docker service name)
+# #     - REDIS_PORT=6379 default port already set
+#      - REDIS_PASSWORD=redis (optional)
+
   celery:
     build: django  # celery is part of django
     entrypoint: [ '/usr/src/django/entrypoint.sh' ]
@@ -58,6 +77,6 @@ services:
       - redis 
       - web
 
-volumes: 
+volumes: # declare all named volumes
   postgres_data:
   redis_data:
